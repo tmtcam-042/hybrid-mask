@@ -34,19 +34,23 @@ def construct_blank_array (radius, primitive_length, rov_width, rov_length, squa
     # One side is radius + width/2 + padding
     # Other side is cos(max_angle)*(radius+width/2+padding)
     # max angle calculated from L
-    turning_sign = np.sign(radius)
     origin = (0,0)
     position_array = []
 
     # Angle (degrees) of endpoint of centre of motion primitive
-    end_angle = (180/np.pi)*(primitive_length/radius) 
-    position_array[0] = (np.cos(end_angle) * abs(radius), np.sin(end_angle) * abs(radius)) # Pos2
+    # Abs because size of array is independent of direction of curve and don't want to handle negative numbers
+    end_angle = int((180/np.pi)*(primitive_length/abs(radius)))
 
     range_of_angles = range(0,end_angle,90)
     for angle in range_of_angles:
         position_array.append((np.cos(angle) * abs(radius), np.sin(angle) * abs(radius)))
+
+    position_array.append((np.cos(end_angle) * abs(radius), np.sin(end_angle) * abs(radius))) # Pos2
     
-    max_x, min_x, max_y, min_y = 0
+    max_x = 0
+    min_x = 0
+    max_y = 0
+    min_y = 0
     for pos in position_array:
         if pos[0] > max_x:
             max_x = pos[0]
@@ -64,11 +68,20 @@ def construct_blank_array (radius, primitive_length, rov_width, rov_length, squa
     max_y += padding
     min_y -= padding
 
+    grid_width = int(np.ceil((max_x - min_x) / square_size))
+    grid_height = int(np.ceil((max_y - min_y) / square_size))
 
-    
+    blank_array = np.zeros((grid_width, grid_height))
+
+    #TODO: Calculate origin and rover centre
+    return blank_array, origin, rov_centre
 
 
-
+def print_array (arr):
+    for line in arr:
+        for value in line:
+            print(int(value), end = "")
+        print("")
 
 def construct_ring_segment (radius, rov_width, rov_length):
     """
@@ -80,4 +93,9 @@ def construct_ring_segment (radius, rov_width, rov_length):
     inner_radius = radius - rov_width/2
     outer_radius = radius + rov_width/2
 
+def main():
+    arr = construct_blank_array(100, 600, 120, 120, 10)
+    print_array(arr)
 
+if __name__ == '__main__':
+    main()
